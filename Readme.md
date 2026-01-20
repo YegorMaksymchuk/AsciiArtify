@@ -12,7 +12,6 @@ This task covers two main components:
 ## 📁 Directory Structure
 
 ```
-04_Kubernetes/01_Task/
 ├── README.md                        # This file - Main directory overview
 ├── README_ArgoCD_PoC.md            # Quick start guide for ArgoCD PoC
 ├── Readme_select_local_k8s_tool.md  # Local K8s tool selection documentation
@@ -231,6 +230,7 @@ When adding new content:
 **Status**: ✅ Complete
 
 **Last Updated**: 2025-01-27
+
 
 
 
