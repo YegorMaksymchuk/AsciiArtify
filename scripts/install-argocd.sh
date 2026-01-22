@@ -86,59 +86,23 @@ echo -e "${BLUE}ArgoCD Service Status:${NC}"
 kubectl get svc -n "$ARGOCD_NAMESPACE"
 echo ""
 
-# Set up port forwarding
-ARGOCD_PORT="8080"
-echo -e "${BLUE}Setting up port forwarding to localhost:${ARGOCD_PORT}...${NC}"
-
-# Check if port is already in use
-if lsof -Pi :${ARGOCD_PORT} -sTCP:LISTEN -t >/dev/null 2>&1 ; then
-    echo -e "${YELLOW}Port ${ARGOCD_PORT} is already in use${NC}"
-    read -p "Do you want to kill the existing process and set up new port forwarding? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${BLUE}Killing process on port ${ARGOCD_PORT}...${NC}"
-        lsof -ti:${ARGOCD_PORT} | xargs kill -9 2>/dev/null || true
-        sleep 2
-    else
-        echo -e "${YELLOW}Skipping port forwarding setup${NC}"
-        PORT_FORWARD_SETUP=false
-    fi
-fi
-
-# Set up port forwarding in background
-if [ "${PORT_FORWARD_SETUP:-true}" != "false" ]; then
-    echo -e "${BLUE}Starting port forwarding (background process)...${NC}"
-    
-    # Start port forwarding in background
-    kubectl port-forward svc/argocd-server -n "$ARGOCD_NAMESPACE" ${ARGOCD_PORT}:8080 > /dev/null 2>&1 &
-    PORT_FORWARD_PID=$!
-    
-    # Wait a moment to check if it started successfully
-    sleep 2
-    
-    if ps -p $PORT_FORWARD_PID > /dev/null 2>&1; then
-        echo -e "${GREEN}✓ Port forwarding started (PID: $PORT_FORWARD_PID)${NC}"
-        echo ""
-        echo -e "${YELLOW}Note: Port forwarding is running in the background${NC}"
-        echo "To stop port forwarding, run: kill $PORT_FORWARD_PID"
-        echo "Or find and kill the process: lsof -ti:${ARGOCD_PORT} | xargs kill"
-        echo ""
-    else
-        echo -e "${YELLOW}Warning: Port forwarding may have failed to start${NC}"
-        echo "You can manually set it up with:"
-        echo "  kubectl port-forward svc/argocd-server -n $ARGOCD_NAMESPACE ${ARGOCD_PORT}:8080"
-        echo ""
-    fi
-fi
-
 echo -e "${GREEN}=== ArgoCD Installation Complete ===${NC}"
+echo ""
+
+# Set up port forwarding
+SCRIPT_DIR="$(dirname "$0")"
+if [ -f "${SCRIPT_DIR}/setup-argocd-port-forward.sh" ]; then
+    echo -e "${BLUE}Setting up port forwarding...${NC}"
+    "${SCRIPT_DIR}/setup-argocd-port-forward.sh"
+else
+    echo -e "${YELLOW}Warning: setup-argocd-port-forward.sh not found${NC}"
+    echo "You can manually set up port forwarding with:"
+    echo "  kubectl port-forward svc/argocd-server -n $ARGOCD_NAMESPACE 8080:8080"
+    echo ""
+fi
+
 echo ""
 echo "Next steps:"
 echo "  1. Run: ./scripts/get-argocd-credentials.sh"
-echo "  2. Access ArgoCD GUI at: http://localhost:${ARGOCD_PORT}"
+echo "  2. Access ArgoCD GUI at: http://localhost:8080 (or the port shown above)"
 echo ""
-if [ "${PORT_FORWARD_SETUP:-true}" != "false" ] && [ -n "$PORT_FORWARD_PID" ]; then
-    echo "Port forwarding is active. To stop it later:"
-    echo "  kill $PORT_FORWARD_PID"
-    echo ""
-fi

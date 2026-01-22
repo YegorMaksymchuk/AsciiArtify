@@ -13,6 +13,7 @@ This directory contains scripts and documentation for deploying ArgoCD on a loca
    ```bash
    ./scripts/install-argocd.sh
    ```
+   This script automatically sets up port forwarding after installation.
 
 3. **Get credentials**
    ```bash
@@ -21,8 +22,14 @@ This directory contains scripts and documentation for deploying ArgoCD on a loca
 
 4. **Access ArgoCD GUI**
    - Open browser: https://localhost:8080 (or http://localhost:8080)
+   - If port 8080 is busy, the script will use port 8081 automatically
    - Accept security certificate warning if prompted (self-signed certificate)
    - Login with credentials from step 3
+
+**Note**: Port forwarding is set up automatically by `install-argocd.sh`. If you need to set up port forwarding manually or restart it, use:
+```bash
+./scripts/setup-argocd-port-forward.sh
+```
 
 ## Directory Structure
 
@@ -31,7 +38,8 @@ This directory contains scripts and documentation for deploying ArgoCD on a loca
 ├── Readme_select_local_k8s_tool.md # Local K8s tool selection documentation
 ├── scripts/
 │   ├── setup-k3d-cluster.sh      # Create k3d cluster with port forwarding
-│   ├── install-argocd.sh         # Install ArgoCD and set up port forwarding
+│   ├── install-argocd.sh         # Install ArgoCD (automatically calls port forwarding script)
+│   ├── setup-argocd-port-forward.sh # Set up port forwarding for ArgoCD UI
 │   ├── get-argocd-credentials.sh # Retrieve admin password
 │   └── cleanup.sh                # Cleanup script to remove cluster
 ├── manifests/
