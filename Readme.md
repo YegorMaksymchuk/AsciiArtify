@@ -1,30 +1,34 @@
 # Local Kubernetes Tools & ArgoCD PoC
 
-This directory contains comprehensive documentation, scripts, and demonstrations for local Kubernetes development tools comparison and ArgoCD Proof of Concept (PoC) implementation.
+This directory contains comprehensive documentation, scripts, and demonstrations for local Kubernetes development tools comparison, ArgoCD Proof of Concept (PoC) implementation, and MVP GitOps deployment.
 
 ## 📋 Overview
 
-This task covers two main components:
+This task covers three main components:
 
 1. **Local Kubernetes Tools Comparison**: Comparative analysis and demonstrations of minikube, kind, and k3d
 2. **ArgoCD PoC**: Complete setup and deployment of ArgoCD GitOps system on k3d cluster
+3. **ArgoCD MVP**: GitOps deployment of go-demo-app application with automated synchronization
 
 ## 📁 Directory Structure
 
 ```
-├── README.md                        # This file - Main directory overview
+├── Readme.md                        # This file - Main directory overview
 ├── README_ArgoCD_PoC.md            # Quick start guide for ArgoCD PoC
 ├── Readme_select_local_k8s_tool.md  # Local K8s tool selection documentation
 ├── scripts/                         # ArgoCD PoC automation scripts
 │   ├── setup-k3d-cluster.sh        # Create k3d cluster with port forwarding
 │   ├── install-argocd.sh           # Install ArgoCD and set up port forwarding
+│   ├── setup-argocd-port-forward.sh # Set up port forwarding for ArgoCD UI
 │   ├── get-argocd-credentials.sh   # Retrieve admin password
 │   └── cleanup.sh                  # Cleanup script to remove cluster
 ├── manifests/                      # Kubernetes manifests
-│   └── argocd-service.yaml         # LoadBalancer service configuration
+│   ├── argocd-service.yaml         # LoadBalancer service configuration
+│   └── go-demo-app-application.yaml # ArgoCD Application manifest for MVP
 ├── doc/                            # Detailed documentation
 │   ├── Concept.md                  # Comprehensive K8s tools comparison
-│   └── POC.md                      # Detailed ArgoCD PoC documentation
+│   ├── POC.md                      # Detailed ArgoCD PoC documentation
+│   └── MVP.md                      # ArgoCD MVP GitOps deployment documentation
 └── demo/                           # Demo scripts and recordings
     ├── demo-k3d.sh                 # k3d demonstration script
     ├── demo-k3d.cast               # k3d asciinema recording
@@ -32,6 +36,10 @@ This task covers two main components:
     ├── demo-kind.cast              # kind asciinema recording
     ├── demo-minikube.sh            # minikube demonstration script
     ├── demo-minikube.cast          # minikube asciinema recording
+    ├── demo-argocd-app.sh          # ArgoCD Application demo script
+    ├── demo-argocd-app.cast        # ArgoCD Application asciinema recording
+    ├── demo-argocd-app-commands.sh # ArgoCD Application demo commands
+    ├── ArgoCD_App_Demo.md          # ArgoCD Application demo documentation
     ├── cleanup-all-clusters.sh     # Cleanup script for all clusters
     ├── K3D_DEMO.md                 # k3d demo documentation
     ├── Kind_Demo.md                # kind demo documentation
@@ -76,7 +84,7 @@ cd demo
 - `README_ArgoCD_PoC.md` - Quick start guide
 - `doc/POC.md` - Comprehensive documentation with manual steps
 - `scripts/` - Automation scripts for setup and cleanup
-- `manifests/` - Kubernetes manifests
+- `manifests/argocd-service.yaml` - LoadBalancer service configuration
 
 **Features**:
 - Automated installation scripts
@@ -94,6 +102,34 @@ cd demo
 
 # Access ArgoCD GUI
 # Open browser: https://localhost:8080
+```
+
+### 3. ArgoCD MVP (Minimum Viable Product)
+
+**Purpose**: Deploy and manage go-demo-app application using ArgoCD GitOps workflow with automated synchronization.
+
+**Key Files**:
+- `doc/MVP.md` - Complete MVP deployment documentation
+- `manifests/go-demo-app-application.yaml` - ArgoCD Application manifest
+- `demo/demo-argocd-app.sh` - Automated demo script
+- `demo/ArgoCD_App_Demo.md` - Demo guide and walkthrough
+
+**Features**:
+- GitOps workflow: Git → ArgoCD → Kubernetes
+- Automated synchronization with self-healing
+- Application deployment and management
+- API endpoint demonstrations
+- Complete GitOps cycle documentation
+
+**Quick Start**:
+```bash
+# Ensure ArgoCD PoC is set up first
+# Then deploy the application
+kubectl apply -f manifests/go-demo-app-application.yaml
+
+# Or run the demo script
+cd demo
+./demo-argocd-app.sh
 ```
 
 ## 📚 Documentation
@@ -123,6 +159,15 @@ cd demo
    - Troubleshooting guide
    - Platform-specific commands (PowerShell, bash)
 
+5. **[doc/MVP.md](doc/MVP.md)**
+   - Complete ArgoCD MVP deployment guide
+   - GitOps workflow documentation
+   - Application deployment instructions
+   - Automated synchronization setup
+   - Self-healing configuration
+   - API endpoint demonstrations
+   - Demo scripts and walkthrough
+
 ## 🚀 Quick Start Guides
 
 ### For Local K8s Tools Comparison
@@ -136,6 +181,13 @@ cd demo
 1. Follow the [ArgoCD PoC Quick Start](README_ArgoCD_PoC.md)
 2. Or use detailed [POC Documentation](doc/POC.md) for manual steps
 3. Access ArgoCD GUI at `https://localhost:8080`
+
+### For ArgoCD MVP
+
+1. Complete ArgoCD PoC setup first
+2. Follow the [MVP Documentation](doc/MVP.md) for application deployment
+3. Run demo script: `cd demo && ./demo-argocd-app.sh`
+4. Review [ArgoCD App Demo Guide](demo/ArgoCD_App_Demo.md) for detailed walkthrough
 
 ## 🛠️ Prerequisites
 
@@ -151,6 +203,12 @@ cd demo
 - kubectl installed
 - Docker running
 - bash shell (or Git Bash/PowerShell on Windows)
+
+### For ArgoCD MVP
+
+- All ArgoCD PoC prerequisites
+- ArgoCD successfully installed and accessible
+- Access to go-demo-app Git repository
 
 ## 📖 Usage Examples
 
@@ -180,6 +238,20 @@ cd demo
 # Or follow manual steps in doc/POC.md
 ```
 
+### Deploy ArgoCD MVP Application
+
+```bash
+# Deploy the ArgoCD Application
+kubectl apply -f manifests/go-demo-app-application.yaml
+
+# Or run the demo script
+cd demo
+./demo-argocd-app.sh
+
+# Check application status
+kubectl get applications -n argocd
+```
+
 ## 🧹 Cleanup
 
 ### Cleanup All Demo Clusters
@@ -202,6 +274,8 @@ cd demo
 3. **Hands-On**: Run demo scripts in `demo/` directory
 4. **ArgoCD Setup**: Follow `README_ArgoCD_PoC.md` for quick start
 5. **Advanced**: Read `doc/POC.md` for manual steps and troubleshooting
+6. **MVP Deployment**: Follow `doc/MVP.md` for GitOps application deployment
+7. **Complete Demo**: Run `demo/demo-argocd-app.sh` to see full GitOps workflow
 
 ## 🔗 Related Documentation
 
@@ -220,7 +294,7 @@ cd demo
 ## 🤝 Contributing
 
 When adding new content:
-- Update this README.md with new files/directories
+- Update this `Readme.md` with new files/directories
 - Add appropriate documentation in `doc/` directory
 - Include platform-specific instructions (macOS, Linux, Windows)
 - Provide both manual steps and automated scripts when possible
