@@ -348,7 +348,7 @@ bash scripts/get-argocd-credentials.sh
 
 ### What the Scripts Do
 
-The automated scripts (`setup-k3d-cluster.sh`, `install-argocd.sh`, `get-argocd-credentials.sh`) perform the following:
+The automated scripts (`setup-k3d-cluster.sh`, `install-argocd.sh`, `setup-argocd-port-forward.sh`, `get-argocd-credentials.sh`) perform the following:
 
 1. **setup-k3d-cluster.sh**:
    - Checks prerequisites (k3d, kubectl, Docker)
@@ -361,11 +361,18 @@ The automated scripts (`setup-k3d-cluster.sh`, `install-argocd.sh`, `get-argocd-
    - Installs ArgoCD from official manifests
    - Waits for all pods to be ready
    - Applies LoadBalancer service
-   - **Automatically sets up port forwarding** to localhost:8080
-   - Saves port forwarding PID for later reference
+   - **Automatically calls `setup-argocd-port-forward.sh`** to set up port forwarding
    - Shows installation status
 
-3. **get-argocd-credentials.sh**:
+3. **setup-argocd-port-forward.sh** (called automatically by install-argocd.sh):
+   - Checks if ArgoCD namespace and service exist
+   - Detects existing port forwarding processes
+   - Sets up port forwarding on port 8080 (or 8081 if 8080 is busy)
+   - Handles port conflicts intelligently
+   - Can be run standalone to restart or reconfigure port forwarding
+   - Displays port forwarding status and PID
+
+4. **get-argocd-credentials.sh**:
    - Waits for ArgoCD secret to be created
    - Retrieves and decodes admin password
    - Displays credentials and access URL
@@ -376,9 +383,11 @@ The automated scripts (`setup-k3d-cluster.sh`, `install-argocd.sh`, `get-argocd-
 - **Faster setup**: All steps automated in sequence
 - **Error handling**: Checks prerequisites and handles errors
 - **Progress indicators**: Shows what's happening at each step
-- **Automatic port forwarding**: Sets up port forwarding automatically
+- **Automatic port forwarding**: Sets up port forwarding automatically with intelligent port conflict handling
+- **Port conflict resolution**: Automatically uses alternative port (8081) if primary port (8080) is busy
+- **Standalone port forwarding**: Can restart port forwarding independently without reinstalling ArgoCD
 - **Consistent**: Same process every time
-- **PID tracking**: Saves port forwarding PID for easy cleanup
+- **PID tracking**: Displays port forwarding PID for easy cleanup
 
 ### When to Use Manual Steps
 
@@ -396,6 +405,27 @@ Use scripts when:
 - Standard installation is sufficient
 - Reproducible setup is required
 - Time-saving is important
+
+### Standalone Port Forwarding Script
+
+The `setup-argocd-port-forward.sh` script can be used independently to set up or restart port forwarding without reinstalling ArgoCD:
+
+```bash
+# Set up or restart port forwarding
+./scripts/setup-argocd-port-forward.sh
+```
+
+**Use cases:**
+- Port forwarding was stopped and needs to be restarted
+- Port forwarding needs to be reconfigured
+- Checking port forwarding status
+- Switching between ports (8080/8081)
+
+**Features:**
+- Automatically detects existing port forwarding processes
+- Handles port conflicts by using alternative port (8081)
+- Shows port forwarding PID for easy management
+- Can be run multiple times safely (won't create duplicates)
 
 ## ArgoCD CLI Access (Optional)
 
@@ -566,6 +596,14 @@ kubectl logs <pod-name> -n argocd
 
 1. **Check port forwarding**:
 
+   **Using the automated script (recommended):**
+   ```bash
+   ./scripts/setup-argocd-port-forward.sh
+   ```
+   This script will automatically detect existing port forwarding, handle port conflicts, and set up forwarding on an available port (8080 or 8081).
+
+   **Manual port forwarding:**
+   
    **macOS / Linux:**
    ```bash
    kubectl port-forward svc/argocd-server -n argocd 8080:8080
@@ -686,7 +724,6 @@ Use the cleanup script for easier removal:
 #### macOS / Linux / Windows (Git Bash)
 
 ```bash
-cd 04_Kubernetes/01_Task
 ./scripts/cleanup.sh
 ```
 
@@ -743,12 +780,14 @@ The **Manual Installation Steps** section (above) provides detailed step-by-step
 
 ### 2. Automated Scripts
 
-The **Automated Scripts** section provides bash scripts that automate all manual steps for faster setup. The scripts (`setup-k3d-cluster.sh`, `install-argocd.sh`, `get-argocd-credentials.sh`) perform the same operations as the manual steps but with:
+The **Automated Scripts** section provides bash scripts that automate all manual steps for faster setup. The scripts (`setup-k3d-cluster.sh`, `install-argocd.sh`, `setup-argocd-port-forward.sh`, `get-argocd-credentials.sh`) perform the same operations as the manual steps but with:
 
 - **Automatic error handling**: Checks prerequisites and handles errors gracefully
 - **Progress indicators**: Shows what's happening at each step with colored output
-- **Automatic port forwarding**: Sets up port forwarding automatically and saves PID
-- **PID tracking**: Saves port forwarding PID for easy cleanup
+- **Automatic port forwarding**: Sets up port forwarding automatically via `setup-argocd-port-forward.sh`
+- **Intelligent port conflict handling**: Automatically uses alternative port (8081) if primary port (8080) is busy
+- **Standalone port forwarding script**: Can restart port forwarding independently without reinstalling ArgoCD
+- **PID tracking**: Displays port forwarding PID for easy cleanup
 - **Consistency**: Same process every time, reducing human error
 - **Time-saving**: Faster setup compared to manual steps
 

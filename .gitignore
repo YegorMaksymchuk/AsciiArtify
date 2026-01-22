@@ -1,0 +1,17 @@
+.DS_Store
+.idea/
+.vscode/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.cursor/
+CLAUDE.md
+AGENT.md
+GROQ.md
+OPENAI.md
+PROMPT.md
+REPLICATE.md
+SERPER.md
+SERPER.md
